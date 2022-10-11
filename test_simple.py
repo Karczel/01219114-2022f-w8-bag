@@ -14,23 +14,38 @@ All rights reserved (proprietary, see reason at end of source file)
 # E = an exception occurred
 # N = not tested
 
-import git
+import traceback
 import os
 import sys
 import re
 from email.utils import parseaddr
-from bag import Bag
-import traceback
+import git
 from pylint.lint import Run as run_pylint
+from bag import Bag
 
 class CheckPoint:
+    """ Defines a single CheckPoint for testing purposes.
+    """
+
     def __init__(self, cpid, cpname, cpscoremax, cpscoremin = 0):
+        """ Creates a new CheckPoint.
+            It requires the maximum score. All new CP's start at 0/cpscoremax.
+            It also begins with "not graded" state. (special = "N")
+        """
         if cpscoremax < cpscoremin:
             raise ValueError
-        self.id, self.name, self.score, self.scoremax, self.scoremin = cpid, cpname, 0, cpscoremax, cpscoremin
+        self.id = cpid
+        self.name = cpname
+        self.score = 0
+        self.scoremax = cpscoremax
+        self.scoremin = cpscoremin
         self.special = "N"
 
     def grade(self, score = None, unflagn = True):
+        """ Grades the CheckPoint.
+            The general use case is grade() which defaults to giving the CP the
+            highest score possible. It also by default removes the "N" flag.
+        """
         if score is None:
             self.score = self.scoremax
             self.special = None if unflagn else self.special
@@ -55,10 +70,12 @@ class CheckPoint:
     def __str__(self):
         if self.special is None:
             return f"{self.score}/{self.scoremax}: {self.name}"
-        else:
-            return f"{self.special}/{self.scoremax}: {self.name}"
+        return f"{self.special}/{self.scoremax}: {self.name}"
 
 class CheckList:
+    """ Contains multiple CheckPoints and allows summations.
+    """
+
     def __init__(self):
         self.cp_list = []
 
@@ -82,8 +99,9 @@ class CheckList:
 
 cl = CheckList()
 
-def shutdown(cl = cl):
-    cl.printall()
+def shutdown(c = cl):
+    """ Spits out all CP's so far (in the CL) and shuts down the test. """
+    c.printall()
     sys.exit(0)
 
 #
@@ -121,10 +139,16 @@ try:
     assert has_master ^ has_main
     current_cp.grade()
     primary_branch = "master" if has_master else "main"
-except:
+    repo.git.checkout(primary_branch)
+except git.exc.GitcommandError:
+    print("Git checkout failed. Please check your {primary_branch} branch.")
+    current_cp.e()
+    shutdown()
+except AssertionError:
     print("ERROR: You may have only either master or main branch, not both!")
     current_cp.e()
     shutdown()
+
 
 #
 # CP03: File Correctness
@@ -182,6 +206,13 @@ try:
             cp04b.grade()
         if id_match and id_match.group(0) == readme_id:
             cp04c.grade()
+except FileNotFoundError as e:
+    print("ERROR: We didn't find README.md.")
+    cp04a.e()
+    cp04b.e()
+    cp04c.e()
+    readme_error = True
+    print(traceback.format_exc())
 except Exception as e:
     print("ERROR: Something went wrong during README file inspection.")
     cp04a.e()
@@ -322,11 +353,16 @@ if add_passed:
             cp05f.e()
             print("HINT : Your code died somewhere around the Bag.weight test.")
             raise
-        for i in range(1000):
-            b.remove(f"{i}")
+        try:
+            for i in range(1000):
+                b.remove(f"{i}")
+        except (IndexError, KeyError) as e:
+            cp05e.e()
+            print("HINT : Did you get your reference right when removing items?")
+            raise
         if b.count() == 0:
             cp05e.grade()
-    except:
+    except Exception as e:
         print(traceback.format_exc())
 
 #
@@ -442,4 +478,3 @@ else:
 #
 
 cl.printall()
-
