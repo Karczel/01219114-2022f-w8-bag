@@ -244,7 +244,7 @@ cp05c = cl.add_cp(CheckPoint(
         ))
 
 required_methods = {"__init__", "add", "remove", "weight", "items", "dump"}
-required_attributes = {"bagweight", "names", "weights"}
+required_attributes = {"bagweight"}
 
 if required_methods.issubset(set(dir(Bag))):
     cp05a.grade()
