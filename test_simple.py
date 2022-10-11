@@ -9,12 +9,6 @@ All rights reserved (proprietary, see reason at end of source file)
 
 """
 
-# Testing your Git repository
-
-# Git repo must have a readme file, first line is your full name,
-# Git repo must have at least one commit called "Initial Commit"
-# That edit must be made by you (username/email check)
-
 # Scoring Guide:
 # 0~p where p is max points = Your test has been scored for correctness.
 # E = an exception occurred
@@ -227,8 +221,8 @@ if required_methods.issubset(set(dir(Bag))):
 # If adding doesn't pass, then we can't do anything else.
 add_passed = False
 
-# Attributes created at runtime won't show up in the Class, so you need to init
-# it first. This means we can't test 05b without 05c, sorry ...
+# Attributes created at init won't show up in the Class, so you need to init it
+# first. This means we can't test 05b without 05c, sorry ...
 
 try:
     b = Bag()
