@@ -13,6 +13,7 @@ MIT License
 from typing import Union
 RealType = Union[int, float]
 
+
 class Bag:
     """
     Implements the Bag of Holding
@@ -36,6 +37,8 @@ class Bag:
         >>> Bag().bagweight
         0
         """
+        self.item = {}
+        self.bagweight = bagweight
 
     def add(self, itemname: str, itemweight: RealType) -> None:
         """ Adds a new item to the Bag. The function will do nothing if there
@@ -57,6 +60,13 @@ class Bag:
             >>> b.count()
             2
         """
+        if itemname.lower() == 'bag':
+            pass
+        elif itemname in self.item:
+            pass
+        else:
+            self.item[itemname] = itemweight
+            self.bagweight += itemweight
 
     def remove(self, itemname: str) -> tuple[str, RealType]:
         """ Removes the item identified by itemname from the Bag and
@@ -67,6 +77,7 @@ class Bag:
             >>> b.remove("stone")
             ('stone', 10)
         """
+        return itemname, self.item.pop(itemname)
 
     def weight(self) -> RealType:
         """ Returns the total (gross) weight.
@@ -81,6 +92,7 @@ class Bag:
             >>> b.weight()
             32.9
         """
+        return self.bagweight
 
     def items(self) -> list[str]:
         """ Returns the list of all item names in the Bag.
@@ -93,6 +105,7 @@ class Bag:
             >>> sorted(b.items())
             ['cheese', 'egg', 'potion']
         """
+        return list(self.item.keys())
 
     def dump(self) -> list[tuple[str, RealType]]:
         """ Completely empties the Bag and returns all items as a list of tuples
@@ -103,6 +116,9 @@ class Bag:
             >>> b.dump()
             [('potion', 2)]
         """
+        a = self.item.copy()
+        self.item = 0
+        return list(a.items())
 
     def count(self) -> int:
         """ Returns the number (int) of items inside the bag.
@@ -117,6 +133,7 @@ class Bag:
             >>> b.count()
             2
         """
+        return len(self.item.keys())
 
     def addmany(self, itemlist: list[tuple[str, RealType]]):
         """ Similar to add, but many items at a time. The itemlist variable is a
@@ -127,6 +144,14 @@ class Bag:
             >>> b.count()
             2
         """
+        for i in range(len(itemlist)):
+            if itemlist[i][0].lower() == 'bag':
+                return self.bagweight
+            elif itemlist[i][0] in self.items():
+                return self.bagweight
+            else:
+                self.item.update({itemlist[i][0]: itemlist[i][1]})
+                self.bagweight + itemlist[i][1]
 
     def removemany(self, namelist: list[str]) -> list[tuple[str, RealType]]:
         """ Similar to remove, but the argument is a list of names
@@ -139,6 +164,10 @@ class Bag:
             >>> sorted(b.removemany(["b", "a"]))
             [('a', 1), ('b', 2)]
         """
+        a = []
+        for i in namelist:
+            a.append((i, self.item.pop(i)))
+        return a
 
 
 if __name__ == "__main__":
@@ -146,4 +175,3 @@ if __name__ == "__main__":
     doctest.testmod()
     # Use the following line INSTEAD if you want to print all tests anyway.
     # doctest.testmod(verbose = True)
-
